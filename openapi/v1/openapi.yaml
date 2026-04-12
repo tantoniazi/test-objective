@@ -1,0 +1,70 @@
+openapi: 3.0.3
+info:
+  title: Test Objective API
+  version: v1
+servers:
+  - url: http://localhost:3000
+paths:
+  /conta:
+    post:
+      summary: Criar conta
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - numero_conta
+                - saldo
+              properties:
+                numero_conta:
+                  type: integer
+                saldo:
+                  type: number
+                  format: float
+      responses:
+        '201':
+          description: Conta criada com sucesso
+        '422':
+          description: Erro de validação
+    get:
+      summary: Consultar conta por numero_conta
+      parameters:
+        - in: query
+          name: numero_conta
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Conta encontrada
+        '404':
+          description: Conta não encontrada
+  /transacao:
+    post:
+      summary: Realizar transação
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - forma_pagamento
+                - numero_conta
+                - valor
+              properties:
+                forma_pagamento:
+                  type: string
+                  enum: [D, C, P]
+                numero_conta:
+                  type: integer
+                valor:
+                  type: number
+                  format: float
+      responses:
+        '201':
+          description: Transação realizada
+        '404':
+          description: Conta não encontrada ou saldo insuficiente
