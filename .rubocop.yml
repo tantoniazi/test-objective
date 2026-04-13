@@ -1,8 +1,26 @@
-# Omakase Ruby styling for Rails
-inherit_gem: { rubocop-rails-omakase: rubocop.yml }
+# Omakase (Rails) + RuboCop alinhados ao Rails 8.1 e Ruby 3.4.
+# https://github.com/rails/rubocop-rails-omakase
+inherit_gem:
+  rubocop-rails-omakase: rubocop.yml
 
-# Overwrite or add rules to create your own house style
-#
-# # Use `[a, [b, c]]` not `[ a, [ b, c ] ]`
-# Layout/SpaceInsideArrayLiteralBrackets:
-#   Enabled: false
+inherit_mode:
+  merge:
+    - Exclude
+    - Include
+
+AllCops:
+  TargetRubyVersion: 3.4
+  TargetRailsVersion: 8.1
+  Exclude:
+    - ".git/**/*"
+    - "db/schema.rb"
+    - "log/**/*"
+    - "node_modules/**/*"
+    - "storage/**/*"
+    - "tmp/**/*"
+    - "vendor/**/*"
+
+# Mesmo padrão de aspas duplas usado em app/config/lib (Omakase).
+Style/StringLiterals:
+  Include:
+    - "spec/**/*"
