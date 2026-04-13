@@ -318,4 +318,11 @@ Devise.setup do |config|
   config.warden do |manager|
     manager.failure_app = CustomFailureApp
   end
+
+  config.jwt do |jwt|
+    jwt.secret = Rails.application.credentials.secret_key_base!
+    jwt.expiration_time = 24.hours.to_i
+    jwt.dispatch_requests = [["POST", %r{^/users/sign_in$}]]
+    jwt.revocation_requests = [["DELETE", %r{^/users/sign_out$}]]
+  end
 end

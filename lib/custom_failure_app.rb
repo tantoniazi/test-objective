@@ -20,7 +20,7 @@ class CustomFailureApp < Devise::FailureApp
   def failure_message_json
     key = (warden_options[:message] || :unauthenticated).to_sym
     case key
-    when :invalid
+    when :invalid, :not_found_in_database
       "Email ou senha inválidos."
     when :unauthenticated
       "Autenticação necessária."

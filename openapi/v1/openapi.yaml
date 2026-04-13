@@ -2,8 +2,8 @@
 openapi: 3.0.3
 info:
   title: API bancária
-  description: Autenticação via sessão Devise (POST /users/sign_in). Reutilize o cookie
-    de sessão nas requisições seguintes.
+  description: Autenticação via JWT Bearer (POST /users/sign_in). Copie o campo `token`
+    da resposta e use como Bearer em rotas privadas.
   version: v1
 paths:
   "/users/sign_in":
@@ -21,6 +21,7 @@ paths:
                 login_ok:
                   value:
                     message: Login realizado com sucesso
+                    token: eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxIn0.example
                     user:
                       id: 1
                       email: admin@example.com
@@ -59,7 +60,7 @@ paths:
       tags:
       - Conta
       security:
-      - cookieAuth: []
+      - bearerAuth: []
       parameters: []
       responses:
         '201':
@@ -101,7 +102,7 @@ paths:
       tags:
       - Conta
       security:
-      - cookieAuth: []
+      - bearerAuth: []
       parameters:
       - name: numero_conta
         in: query
@@ -126,7 +127,7 @@ paths:
       tags:
       - Transação
       security:
-      - cookieAuth: []
+      - bearerAuth: []
       parameters: []
       responses:
         '201':
@@ -177,8 +178,8 @@ servers:
       default: '3000'
 components:
   securitySchemes:
-    cookieAuth:
-      type: apiKey
-      in: cookie
-      name: _test_objective_session
-      description: Cookie definido após login em POST /users/sign_in
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: JWT obtido no campo `token` da resposta de POST /users/sign_in

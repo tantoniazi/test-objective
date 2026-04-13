@@ -3,9 +3,6 @@ SERVICE = app
 
 .PHONY: build up down restart logs ps setup shell db migrate test clean
 
-build:
-	$(COMPOSE) build
-
 up:
 	$(COMPOSE) up -d --build
 

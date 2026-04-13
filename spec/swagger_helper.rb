@@ -10,7 +10,7 @@ RSpec.configure do |config|
       openapi: "3.0.3",
       info: {
         title: "API bancária",
-        description: "Autenticação via sessão Devise (POST /users/sign_in). Reutilize o cookie de sessão nas requisições seguintes.",
+        description: "Autenticação via JWT Bearer (POST /users/sign_in). Copie o campo `token` da resposta e use como Bearer em rotas privadas.",
         version: "v1"
       },
       paths: {},
@@ -19,11 +19,11 @@ RSpec.configure do |config|
       ],
       components: {
         securitySchemes: {
-          cookieAuth: {
-            type: :apiKey,
-            in: :cookie,
-            name: "_test_objective_session",
-            description: "Cookie definido após login em POST /users/sign_in"
+          bearerAuth: {
+            type: :http,
+            scheme: :bearer,
+            bearerFormat: "JWT",
+            description: "JWT obtido no campo `token` da resposta de POST /users/sign_in"
           }
         }
       }
