@@ -9,7 +9,7 @@ RSpec.describe SystemErrorMailer, type: :mailer do
     end
 
     it "envia para o endereço configurado" do
-      expect(mail.to).to eq(["ops@example.com"])
+      expect(mail.to).to eq([ "ops@example.com" ])
       expect(mail.subject).to include("Erro inesperado")
     end
 

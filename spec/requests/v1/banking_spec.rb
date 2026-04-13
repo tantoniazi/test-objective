@@ -13,7 +13,7 @@ RSpec.describe "API bancária", openapi_spec: "v1/openapi.yaml", type: :request 
       produces "application/json"
       parameter name: :payload, in: :body, schema: {
         type: :object,
-        required: [:user],
+        required: [ :user ],
         properties: {
           user: {
             type: :object,
@@ -52,7 +52,7 @@ RSpec.describe "API bancária", openapi_spec: "v1/openapi.yaml", type: :request 
   path "/conta" do
     post "Criar conta" do
       tags "Conta"
-      security [{ cookieAuth: [] }]
+      security [ { cookieAuth: [] } ]
       consumes "application/json"
       produces "application/json"
       parameter name: :payload, in: :body, schema: {
@@ -93,7 +93,7 @@ RSpec.describe "API bancária", openapi_spec: "v1/openapi.yaml", type: :request 
 
     get "Consultar conta" do
       tags "Conta"
-      security [{ cookieAuth: [] }]
+      security [ { cookieAuth: [] } ]
       produces "application/json"
       parameter name: :numero_conta, in: :query, type: :integer, required: true,
         example: 120_001
@@ -119,7 +119,7 @@ RSpec.describe "API bancária", openapi_spec: "v1/openapi.yaml", type: :request 
   path "/transacao" do
     post "Registrar transação" do
       tags "Transação"
-      security [{ cookieAuth: [] }]
+      security [ { cookieAuth: [] } ]
       consumes "application/json"
       produces "application/json"
       parameter name: :payload, in: :body, schema: {

@@ -1,5 +1,5 @@
 Rswag::Api.configure do |c|
-  c.openapi_root = Rails.root.join('openapi').to_s
+  c.openapi_root = Rails.root.join("openapi").to_s
 end
 
 Rswag::Ui.configure do |c|

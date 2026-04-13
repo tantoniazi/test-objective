@@ -18,7 +18,7 @@ RSpec.describe RackAttackMailer, type: :mailer do
     end
 
     it "envia alerta de segurança" do
-      expect(mail.to).to eq(["ops@example.com"])
+      expect(mail.to).to eq([ "ops@example.com" ])
       expect(mail.subject).to include("Rack::Attack")
       expect(mail.body.encoded).to include("203.0.113.1")
     end
