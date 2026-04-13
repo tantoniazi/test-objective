@@ -14,7 +14,7 @@ class Rack::Attack
         "Content-Type" => "application/json",
         "Retry-After" => period.to_s
       },
-      [body]
+      [ body ]
     ]
   end
 
@@ -23,7 +23,7 @@ class Rack::Attack
     [
       403,
       { "Content-Type" => "application/json" },
-      [body]
+      [ body ]
     ]
   end
 
