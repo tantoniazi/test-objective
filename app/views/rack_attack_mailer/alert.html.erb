@@ -1,0 +1,10 @@
+<h1>Alerta Rack::Attack</h1>
+<dl>
+  <dt>Evento</dt><dd><%= @event %></dd>
+  <dt>Regra</dt><dd><%= @rule_name %></dd>
+  <dt>IP</dt><dd><%= @ip %></dd>
+  <dt>Requisição</dt><dd><code><%= @method %> <%= @path %></code></dd>
+  <dt>Discriminador</dt><dd><%= @discriminator %></dd>
+  <dt>Dados da regra</dt><dd><pre><%= @match_data %></pre></dd>
+  <dt>User-Agent</dt><dd><%= @user_agent %></dd>
+</dl>

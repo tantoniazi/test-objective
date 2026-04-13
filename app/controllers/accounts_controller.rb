@@ -1,26 +1,32 @@
+# frozen_string_literal: true
+
 class AccountsController < ApplicationController
+  include ApiErrorReporting
+
   def create
-    if Account.exists?(numero_conta: params[:numero_conta])
-      render json: { erro: 'Conta já existente' }, status: :unprocessable_entity
+    if Account.exists?(numero_conta: account_params[:numero_conta])
+      render json: { erro: "Conta já existente" }, status: :unprocessable_entity
       return
     end
 
-    account = Account.new(numero_conta: params[:numero_conta], saldo: params[:saldo])
+    account = current_user.accounts.build(account_params)
 
     if account.save
-      render json: { numero_conta: account.numero_conta, saldo: account.saldo }, status: :created
+      render json: AccountSerializer.new(account).as_json, status: :created
     else
       render json: { erros: account.errors.full_messages }, status: :unprocessable_entity
     end
   end
 
   def show
-    account = Account.find_by(numero_conta: params[:numero_conta])
+    account = current_user.accounts.includes(:transactions).find_by!(numero_conta: params.require(:numero_conta))
 
-    if account
-      render json: { numero_conta: account.numero_conta, saldo: account.saldo }
-    else
-      render json: { erro: 'Conta não encontrada' }, status: :not_found
-    end
+    render json: AccountSerializer.new(account).as_json
   end
-end´
+
+  private
+
+  def account_params
+    params.permit(:numero_conta, :saldo)
+  end
+end

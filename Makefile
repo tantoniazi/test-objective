@@ -8,7 +8,6 @@ build:
 
 up:
 	$(COMPOSE) up -d --build
-	$(MAKE) setup
 
 down:
 	$(COMPOSE) down
@@ -21,9 +20,6 @@ logs:
 
 ps:
 	$(COMPOSE) ps
-
-setup:
-	$(COMPOSE) run --rm $(SERVICE) bundle exec rails db:prepare
 
 shell:
 	$(COMPOSE) exec $(SERVICE) bash

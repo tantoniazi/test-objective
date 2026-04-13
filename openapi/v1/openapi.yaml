@@ -1,70 +1,184 @@
+---
 openapi: 3.0.3
 info:
-  title: Test Objective API
+  title: API bancária
+  description: Autenticação via sessão Devise (POST /users/sign_in). Reutilize o cookie
+    de sessão nas requisições seguintes.
   version: v1
-servers:
-  - url: http://localhost:3000
 paths:
-  /conta:
+  "/users/sign_in":
     post:
-      summary: Criar conta
+      summary: Login (Devise)
+      tags:
+      - Autenticação
+      parameters: []
+      responses:
+        '200':
+          description: sessão criada
+          content:
+            application/json:
+              examples:
+                login_ok:
+                  value:
+                    message: Login realizado com sucesso
+                    user:
+                      id: 1
+                      email: admin@example.com
+        '401':
+          description: credenciais inválidas
+          content:
+            application/json:
+              examples:
+                login_fail:
+                  value:
+                    erro: Email ou senha inválidos.
       requestBody:
-        required: true
         content:
           application/json:
             schema:
               type: object
               required:
-                - numero_conta
-                - saldo
+              - user
+              properties:
+                user:
+                  type: object
+                  required:
+                  - email
+                  - password
+                  properties:
+                    email:
+                      type: string
+                      example: admin@example.com
+                    password:
+                      type: string
+                      example: '123456'
+                      format: password
+  "/conta":
+    post:
+      summary: Criar conta
+      tags:
+      - Conta
+      security:
+      - cookieAuth: []
+      parameters: []
+      responses:
+        '201':
+          description: conta criada
+          content:
+            application/json:
+              examples:
+                conta_criada:
+                  value:
+                    numero_conta: 130001
+                    saldo: 200.5
+                    transacoes: []
+        '401':
+          description: não autenticado
+          content:
+            application/json:
+              examples:
+                sem_auth:
+                  value:
+                    erro: Autenticação necessária.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+              - numero_conta
+              - saldo
               properties:
                 numero_conta:
                   type: integer
+                  example: 10002
                 saldo:
                   type: number
                   format: float
-      responses:
-        '201':
-          description: Conta criada com sucesso
-        '422':
-          description: Erro de validação
+                  example: 150.75
     get:
-      summary: Consultar conta por numero_conta
+      summary: Consultar conta
+      tags:
+      - Conta
+      security:
+      - cookieAuth: []
       parameters:
-        - in: query
-          name: numero_conta
-          required: true
-          schema:
-            type: integer
+      - name: numero_conta
+        in: query
+        required: true
+        example: 120001
+        schema:
+          type: integer
       responses:
         '200':
-          description: Conta encontrada
-        '404':
-          description: Conta não encontrada
-  /transacao:
+          description: conta encontrada
+          content:
+            application/json:
+              examples:
+                conta_ok:
+                  value:
+                    numero_conta: 120001
+                    saldo: 1000.0
+                    transacoes: []
+  "/transacao":
     post:
-      summary: Realizar transação
+      summary: Registrar transação
+      tags:
+      - Transação
+      security:
+      - cookieAuth: []
+      parameters: []
+      responses:
+        '201':
+          description: transação registrada (Pix)
+          content:
+            application/json:
+              examples:
+                pix_ok:
+                  value:
+                    numero_conta: 120001
+                    saldo: 975.0
+        '422':
+          description: saldo insuficiente
+          content:
+            application/json:
+              examples:
+                saldo_insuficiente:
+                  value:
+                    erro: Saldo insuficiente
       requestBody:
-        required: true
         content:
           application/json:
             schema:
               type: object
               required:
-                - forma_pagamento
-                - numero_conta
-                - valor
+              - numero_conta
+              - forma_pagamento
+              - valor
               properties:
-                forma_pagamento:
-                  type: string
-                  enum: [D, C, P]
                 numero_conta:
                   type: integer
+                  example: 120001
+                forma_pagamento:
+                  type: string
+                  enum:
+                  - P
+                  - D
+                  - C
+                  example: P
                 valor:
                   type: number
                   format: float
-      responses:
-        '201':
-          description: Transação realizada
-        '404':
-          description: Conta não encontrada ou saldo insuficiente
+                  example: 50.0
+servers:
+- url: http://localhost:{port}
+  variables:
+    port:
+      default: '3000'
+components:
+  securitySchemes:
+    cookieAuth:
+      type: apiKey
+      in: cookie
+      name: _test_objective_session
+      description: Cookie definido após login em POST /users/sign_in

@@ -50,4 +50,10 @@ Rails.application.configure do
 
   # Raise error when a before_action's only/except options reference missing actions.
   config.action_controller.raise_on_missing_callback_actions = true
+
+  config.active_job.queue_adapter = :test
+
+  config.after_initialize do
+    Rack::Attack.enabled = false if defined?(Rack::Attack)
+  end
 end

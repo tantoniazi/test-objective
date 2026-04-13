@@ -27,3 +27,6 @@
 /tmp/storage/*
 !/tmp/storage/
 !/tmp/storage/.keep
+
+# Rendered in CI (do not commit)
+/k8s/deployment.rendered.yaml

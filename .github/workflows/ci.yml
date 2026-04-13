@@ -1,9 +1,19 @@
 name: CI
 
+# Testes (PR + main), análise estática e deploy em Kubernetes apenas no push para main.
+# Secrets necessários para deploy:
+#   KUBE_CONFIG_DATA — kubeconfig completo codificado em base64 (kubectl config view --raw | base64 -w0)
+# Opcional: ajuste o namespace em k8s/*.yaml e o nome do Secret de runtime (test-objective-secrets).
+
 on:
   pull_request:
   push:
-    branches: [ main ]
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  packages: write
 
 jobs:
   scan_ruby:
@@ -20,10 +30,10 @@ jobs:
 
       - name: Scan for common Rails security vulnerabilities using static analysis
         run: bin/brakeman --no-pager
-      
+
       - name: Scan for known security vulnerabilities in gems used
         run: bin/bundler-audit
-      
+
   lint:
     runs-on: ubuntu-latest
     env:
@@ -63,12 +73,6 @@ jobs:
           - 5432:5432
         options: --health-cmd="pg_isready" --health-interval=10s --health-timeout=5s --health-retries=3
 
-      # redis:
-      #   image: valkey/valkey:8
-      #   ports:
-      #     - 6379:6379
-      #   options: --health-cmd "redis-cli ping" --health-interval 10s --health-timeout 5s --health-retries 5
-
     steps:
       - name: Install packages
         run: sudo apt-get update && sudo apt-get install --no-install-recommends -y libpq-dev libvips
@@ -85,6 +89,62 @@ jobs:
         env:
           RAILS_ENV: test
           DATABASE_URL: postgres://postgres:postgres@localhost:5432
-          # RAILS_MASTER_KEY: ${{ secrets.RAILS_MASTER_KEY }}
-          # REDIS_URL: redis://localhost:6379/0
-        run: bin/rails db:test:prepare test
+        run: bin/rails db:test:prepare && bundle exec rspec
+
+  deploy:
+    name: Build image and deploy to Kubernetes
+    runs-on: ubuntu-latest
+    needs: [scan_ruby, lint, test]
+    if: github.ref == 'refs/heads/main' && (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
+
+    env:
+      REGISTRY: ghcr.io
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+
+      - name: Image name (lowercase for GHCR)
+        id: image
+        run: echo "full=${REGISTRY}/$(echo '${{ github.repository }}' | tr '[:upper:]' '[:lower:]')" >> "$GITHUB_OUTPUT"
+
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build and push
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: Dockerfile
+          push: true
+          tags: |
+            ${{ steps.image.outputs.full }}:sha-${{ github.sha }}
+            ${{ steps.image.outputs.full }}:latest
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Install kubectl
+        uses: azure/setup-kubectl@v4
+
+      - name: Configure kubeconfig
+        run: |
+          mkdir -p ~/.kube
+          echo "${{ secrets.KUBE_CONFIG_DATA }}" | base64 -d > ~/.kube/config
+          chmod 600 ~/.kube/config
+
+      - name: Apply manifests and rollout
+        env:
+          IMAGE_TAG: ${{ steps.image.outputs.full }}:sha-${{ github.sha }}
+        run: |
+          sed "s|__IMAGE__|${IMAGE_TAG}|g" k8s/deployment.yaml > k8s/deployment.rendered.yaml
+          kubectl apply -f k8s/namespace.yaml
+          kubectl apply -f k8s/service.yaml
+          kubectl apply -f k8s/deployment.rendered.yaml
+          kubectl -n test-objective rollout status deployment/test-objective --timeout=300s

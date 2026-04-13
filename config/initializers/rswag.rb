@@ -3,5 +3,5 @@ Rswag::Api.configure do |c|
 end
 
 Rswag::Ui.configure do |c|
-  c.openapi_endpoint '/api-docs/v1/openapi.yaml', 'API V1 OpenAPI'
+  c.openapi_endpoint "/api-docs/v1/openapi.yaml", "API bancária v1"
 end
