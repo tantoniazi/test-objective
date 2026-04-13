@@ -10,7 +10,7 @@ gem "puma", ">= 5.0"
 # gem "jbuilder"
 
 gem "bcrypt", "~> 3.1.7"
-gem "devise", "~> 4.9"
+gem "devise", "~> 5.0", ">= 5.0.3"
 gem "active_model_serializers", "~> 0.10"
 gem "rack-attack", "~> 6.7"
 
