@@ -58,5 +58,5 @@ group :development, :test do
   gem "rspec-rails", "~> 8.0"
   gem "rswag-specs", "~> 2.16"
   gem "factory_bot_rails", "~> 6.5"
-  gem "bullet", "~> 8.0"
+  gem "bullet", "~> 8.1"
 end
